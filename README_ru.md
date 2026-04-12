@@ -113,8 +113,8 @@ opkg install luci-theme-proton2025_*_all.ipk
 **На вашем роутере OpenWrt** (через SSH), скачайте APK-пакет из релиза и установите его:
 
 ```bash
-wget https://github.com/ChesterGoodiny/luci-theme-proton2025/releases/latest/download/luci-theme-proton2025_*.apk
-apk add --allow-untrusted luci-theme-proton2025_*.apk
+wget https://github.com/ChesterGoodiny/luci-theme-proton2025/releases/latest/download/luci-theme-proton2025-*.apk
+apk add --allow-untrusted luci-theme-proton2025-*.apk
 ```
 
 > 💡 Примечание: этот способ работает только с корректно собранным OpenWrt `.apk`, полученным через OpenWrt SDK/buildroot.

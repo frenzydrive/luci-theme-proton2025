@@ -113,8 +113,8 @@ Or download manually from [GitHub Releases](https://github.com/ChesterGoodiny/lu
 **On your OpenWrt router** (via SSH), download the APK package from the latest release and install it:
 
 ```bash
-wget https://github.com/ChesterGoodiny/luci-theme-proton2025/releases/latest/download/luci-theme-proton2025_*.apk
-apk add --allow-untrusted luci-theme-proton2025_*.apk
+wget https://github.com/ChesterGoodiny/luci-theme-proton2025/releases/latest/download/luci-theme-proton2025-*.apk
+apk add --allow-untrusted luci-theme-proton2025-*.apk
 ```
 
 > 💡 Note: this only works with a valid OpenWrt `.apk` produced by the OpenWrt SDK/buildroot.
