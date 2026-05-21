@@ -1,0 +1,89 @@
+/*
+ * Proton2025 login background customization.
+ * Geometry-safe: does not change original form width/height/padding/margins.
+ * Accent-safe: animation and controls follow Proton2025 accent CSS variables.
+ */
+
+body.login-page {
+    background: var(--proton-bg-solid, #0f1419) !important;
+    overflow: hidden !important;
+}
+
+#particles-js {
+    position: fixed !important;
+    inset: 0 !important;
+
+    width: 100vw !important;
+    height: 100vh !important;
+    width: 100dvw !important;
+    height: 100dvh !important;
+
+    display: block !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+}
+
+body.login-page .login-container,
+body.login-page .login-card {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+body.login-page .login-card {
+    color: rgb(245, 247, 250) !important;
+    background-color: rgba(255, 255, 255, 0.03) !important;
+    background-image: none !important;
+    border-color: rgba(255, 255, 255, 0.06) !important;
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 8px 32px 0px !important;
+
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+}
+
+body.login-page .login-form input[type="text"],
+body.login-page .login-form input[type="password"] {
+    color: rgb(245, 247, 250) !important;
+    background-color: rgba(255, 255, 255, 0.024) !important;
+    background-image: none !important;
+    border-color: rgba(255, 255, 255, 0.06) !important;
+    box-shadow: none !important;
+}
+
+body.login-page .login-form input[type="text"]:focus,
+body.login-page .login-form input[type="password"]:focus {
+    border-color: var(--proton-accent, #5e9eff) !important;
+    box-shadow:
+        0 0 0 1px var(--primary-color-low, rgba(94,158,255,0.35)),
+        0 0 18px var(--proton-accent-glow, rgba(94,158,255,0.18)) !important;
+    outline: none !important;
+}
+
+body.login-page .login-form button,
+body.login-page .login-form input[type="submit"],
+body.login-page .login-form .btn {
+    color: var(--on-primary-color, #fff) !important;
+    background-color: transparent !important;
+    background-image: linear-gradient(
+        135deg,
+        var(--proton-accent, #5e9eff) 0%,
+        var(--primary-color-medium, #7db2ff) 100%
+    ) !important;
+    border-color: transparent !important;
+    box-shadow: 0 14px 32px var(--proton-accent-glow, rgba(94,158,255,0.18)) !important;
+}
+
+body.login-page .login-form button:hover,
+body.login-page .login-form input[type="submit"]:hover,
+body.login-page .login-form .btn:hover {
+    background-image: linear-gradient(
+        135deg,
+        var(--proton-accent-hover, #7db2ff) 0%,
+        var(--proton-accent, #5e9eff) 100%
+    ) !important;
+}
+
+body.login-page .login-form label,
+body.login-page .login-header,
+body.login-page .login-logo {
+    color: rgb(245, 247, 250) !important;
+}
