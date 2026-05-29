@@ -19,7 +19,8 @@
         ["flowfield", "Flow Field"],
         ["circuit", "Circuit Board"],
         ["packetpulses", "Packet Pulses"],
-        ["hex", "Hex Grid"]
+        ["hex", "Hex Grid"],
+        ["underwater", "Underwater Depths"]
     ];
 
     function isRu() {
