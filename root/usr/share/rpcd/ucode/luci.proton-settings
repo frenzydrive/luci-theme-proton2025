@@ -40,7 +40,8 @@ const VALID_OPTIONS = {
         	'flowfield',
         	'circuit',
         	'packetpulses',
-        	'hex'
+        	'hex',
+		'underwater'
     	]
 	}
 };

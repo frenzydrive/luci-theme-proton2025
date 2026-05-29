@@ -3,7 +3,7 @@
  * Reads mode from localStorage key: proton-login-animation
  * Supported modes:
  * off, particles, constellation, plexus, breathing, gravity, lowpoly,
- * dataflow, flowfield, circuit, packetpulses, hex
+ * dataflow, flowfield, circuit, packetpulses, hex, underwater
  */
 (function () {
     "use strict";
@@ -63,7 +63,7 @@
         };
     }
 
-    function rand(min, max) {
+    function darken(c, k) { return { r: c.r * (1 - k), g: c.g * (1 - k), b: c.b * (1 - k) }; } function mix(a, b, k) { return { r: a.r + (b.r - a.r) * k, g: a.g + (b.g - a.g) * k, b: a.b + (b.b - a.b) * k }; } function rand(min, max) {
         return Math.random() * (max - min) + min;
     }
 
@@ -254,11 +254,7 @@
                 createCircuit();
             } else if (mode === "packetpulses") {
                 createPoints(14200, 0.10, 0.34, 1.1, 2.2);
-            } else if (mode === "hex") {
-                createPoints(26000, 0.08, 0.22, 0.9, 1.6);
-            } else {
-                createPoints(15500, 0.16, 0.48, 1.15, 2.2);
-            }
+            } else if (mode === "hex") { createPoints(26000, 0.08, 0.22, 0.9, 1.6); } else if (mode === "underwater") { createUnderwaterPoints(); } else { createPoints(15500, 0.16, 0.48, 1.15, 2.2); }
         }
 
         function updateWrap() {
@@ -756,7 +752,7 @@
             drawNetwork(105, 0.10, 0.52, false);
         }
 
-        function draw(now) {
+        function createUnderwaterPoints() { var n = Math.max(90, Math.min(220, Math.floor((w * h) / 6000))); points = []; for (var i = 0; i < n; i++) { var large = Math.random() < 0.12; points.push({ x: rand(0, w), y: rand(0, h), r: large ? rand(2.45, 3.65) : rand(0.75, 2.35), speed: large ? rand(0.38, 1.10) : rand(0.45, 1.55), seed: rand(0, 9999), bright: Math.random() > (large ? 0.72 : 0.86), large: large }); } drawUnderwater._bgReady = false; } function drawUnderwater() { var accentKey = [ Math.round(theme.accent.r), Math.round(theme.accent.g), Math.round(theme.accent.b) ].join("-"); var bgW = Math.max(1, Math.floor(w)); var bgH = Math.max(1, Math.floor(h)); if (!drawUnderwater._bgCanvas) { drawUnderwater._bgCanvas = document.createElement("canvas"); drawUnderwater._bgCtx = drawUnderwater._bgCanvas.getContext("2d"); } var bgCanvas = drawUnderwater._bgCanvas; var bgCtx = drawUnderwater._bgCtx; if ( !drawUnderwater._bgReady || drawUnderwater._accentKey !== accentKey || bgCanvas.width !== bgW || bgCanvas.height !== bgH ) { bgCanvas.width = bgW; bgCanvas.height = bgH; var deepBase = { r: 1, g: 4, b: 8 }; var waterTop = mix(darken(theme.accent, 0.28), { r: 18, g: 58, b: 82 }, 0.34); var waterMid = mix(darken(theme.accent, 0.58), { r: 10, g: 39, b: 61 }, 0.46); var waterDeep = mix(darken(theme.accent, 0.78), { r: 3, g: 17, b: 29 }, 0.58); var bgGrad = bgCtx.createLinearGradient(0, 0, 0, h); bgGrad.addColorStop(0, rgba(waterTop, 1)); bgGrad.addColorStop(0.30, rgba(waterMid, 1)); bgGrad.addColorStop(0.68, rgba(waterDeep, 1)); bgGrad.addColorStop(1, rgba(deepBase, 1)); bgCtx.fillStyle = bgGrad; bgCtx.fillRect(0, 0, w, h); var surfaceGlow = bgCtx.createRadialGradient( w * 0.50, -h * 0.12, 0, w * 0.50, -h * 0.12, Math.max(w, h) * 0.96 ); surfaceGlow.addColorStop(0, rgba(lighten(theme.accent, 0.85), 0.40)); surfaceGlow.addColorStop(0.20, rgba(lighten(theme.accent, 0.58), 0.20)); surfaceGlow.addColorStop(0.52, rgba(theme.accent, 0.055)); surfaceGlow.addColorStop(1, rgba(theme.accent, 0)); bgCtx.fillStyle = surfaceGlow; bgCtx.fillRect(0, 0, w, h); var rayScale = 0.20; var rw = Math.max(1, Math.floor(w * rayScale)); var rh = Math.max(1, Math.floor(h * rayScale)); if (!drawUnderwater._rayCanvas) { drawUnderwater._rayCanvas = document.createElement("canvas"); drawUnderwater._rayCtx = drawUnderwater._rayCanvas.getContext("2d"); } var rc = drawUnderwater._rayCanvas; var rctx = drawUnderwater._rayCtx; rc.width = rw; rc.height = rh; rctx.setTransform(1, 0, 0, 1, 0, 0); rctx.clearRect(0, 0, rw, rh); rctx.setTransform(rayScale, 0, 0, rayScale, 0, 0); rctx.globalCompositeOperation = "screen"; rctx.lineCap = "round"; rctx.lineJoin = "round"; rctx.filter = "blur(9px)"; var rayCount = Math.max(3, Math.min(5, Math.floor(w / 360))); for (var i = 0; i < rayCount; i++) { var seed = i * 6.731 + 1.37; var n1 = Math.sin(seed * 12.9898) * 43758.5453; var n2 = Math.sin(seed * 78.233) * 24634.6345; var n3 = Math.sin(seed * 37.719) * 10371.1931; var a = n1 - Math.floor(n1); var b = n2 - Math.floor(n2); var c = n3 - Math.floor(n3); var baseX = (i + 0.54) / rayCount * w + (a - 0.5) * 210; var reach = h * (0.72 + b * 0.24); var sway = Math.sin(seed) * (46 + b * 54); var tilt = Math.sin(seed * 0.73) * (95 + c * 145); var pulse = 0.92; var x0 = baseX + sway; var x1 = baseX + sway * 0.70 + tilt * 0.16; var x2 = baseX + tilt * 0.38; var x3 = baseX + tilt; var halo = rctx.createLinearGradient(0, 0, 0, reach); halo.addColorStop(0, rgba(lighten(theme.accent, 0.95), 0.108 * pulse)); halo.addColorStop(0.28, rgba(lighten(theme.accent, 0.70), 0.052 * pulse)); halo.addColorStop(0.68, rgba(lighten(theme.accent, 0.34), 0.018 * pulse)); halo.addColorStop(1, rgba(theme.accent, 0)); rctx.strokeStyle = halo; rctx.lineWidth = 86 + b * 78; rctx.beginPath(); rctx.moveTo(x0, -70); rctx.bezierCurveTo(x1, reach * 0.20, x2, reach * 0.50, x3, reach); rctx.stroke(); var body = rctx.createLinearGradient(0, 0, 0, reach * 0.86); body.addColorStop(0, rgba(lighten(theme.accent, 0.98), 0.082 * pulse)); body.addColorStop(0.38, rgba(lighten(theme.accent, 0.70), 0.030 * pulse)); body.addColorStop(1, rgba(theme.accent, 0)); rctx.strokeStyle = body; rctx.lineWidth = 30 + c * 28; rctx.beginPath(); rctx.moveTo(x0 + (c - 0.5) * 26, -55); rctx.bezierCurveTo(x1 + 20, reach * 0.24, x2 - 34, reach * 0.54, x3 + 18, reach * 0.88); rctx.stroke(); } rctx.filter = "none"; var haze = rctx.createLinearGradient(0, 0, 0, h * 0.42); haze.addColorStop(0, rgba(lighten(theme.accent, 0.82), 0.075)); haze.addColorStop(0.34, rgba(lighten(theme.accent, 0.48), 0.030)); haze.addColorStop(1, rgba(theme.accent, 0)); rctx.fillStyle = haze; rctx.fillRect(0, 0, w, h * 0.42); bgCtx.save(); bgCtx.globalCompositeOperation = "screen"; bgCtx.imageSmoothingEnabled = true; bgCtx.drawImage(rc, 0, 0, w, h); bgCtx.restore(); var vignette = bgCtx.createRadialGradient( w * 0.5, h * 0.45, Math.min(w, h) * 0.18, w * 0.5, h * 0.52, Math.max(w, h) * 0.86 ); vignette.addColorStop(0, "rgba(0,0,0,0)"); vignette.addColorStop(0.74, "rgba(0,0,0,0.15)"); vignette.addColorStop(1, "rgba(0,0,0,0.50)"); bgCtx.fillStyle = vignette; bgCtx.fillRect(0, 0, w, h); drawUnderwater._accentKey = accentKey; drawUnderwater._bgReady = true; } ctx.drawImage(bgCanvas, 0, 0, w, h); ctx.save(); ctx.globalCompositeOperation = "screen"; var span = h + 48; for (var pIdx = 0; pIdx < points.length; pIdx++) { var p = points[pIdx]; var driftY = (time * 0.030 * p.speed + p.seed * 0.37) % span; var y = ((p.y - driftY + span * 4) % span) - 24; var x = p.x + Math.sin(time * 0.00055 + p.seed) * 0.26 + Math.sin(y * 0.013 + p.seed) * 0.06; var depthFade = 0.22 + 0.58 * (1 - y / h); var twinkle = 0.70 + 0.30 * Math.sin(time * 0.0010 + p.seed); var size = p.large ? p.r : (p.bright ? p.r * 1.25 : p.r); var alpha = ((p.large || p.bright) ? 0.44 : 0.29) * depthFade * twinkle; ctx.fillStyle = rgba(lighten(theme.accent, (p.large || p.bright) ? 0.90 : 0.56), alpha); ctx.fillRect(x, y, Math.max(1, size), Math.max(1, size)); if (p.bright || p.large) { var s = Math.max(1, size * 0.72); ctx.fillStyle = rgba(lighten(theme.accent, 0.95), alpha * (p.large ? 0.34 : 0.42)); ctx.fillRect(x - s, y, s * 2.1, 1); ctx.fillRect(x, y - s, 1, s * 2.1); } } ctx.restore(); } function draw(now) {
             time = now || 0;
 
             var currentMode = getMode();
@@ -788,8 +784,7 @@
                 else if (mode === "flowfield") drawFlowField();
                 else if (mode === "circuit") drawCircuit();
                 else if (mode === "packetpulses") drawPacketPulses();
-                else if (mode === "hex") drawHex();
-                else drawParticles();
+                else if (mode === "hex") drawHex(); else if (mode === "underwater") drawUnderwater(); else drawParticles();
             }
 
             requestAnimationFrame(draw);
