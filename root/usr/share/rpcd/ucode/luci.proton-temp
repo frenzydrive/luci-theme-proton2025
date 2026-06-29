@@ -6,7 +6,7 @@
 
 'use strict';
 
-import { readfile, lsdir } from 'fs';
+import { readfile, lsdir, realpath } from 'fs';
 
 // Storage for peak temperatures (persists while rpcd is running)
 let peakTemps = {};
@@ -34,25 +34,35 @@ function findDirs(basePath, prefix) {
 // Get all temperature sensors
 function getSensors() {
 	let sensors = [];
-	
+
+	// Canonical device paths backing each thermal_zone, used to dedup the
+	// same physical sensor when it is also exposed via hwmon (see below).
+	let thermalDeviceIds = {};
+
 	// === 1. Read thermal_zone sensors ===
 	let thermalZones = findDirs('/sys/class/thermal', 'thermal_zone');
-	
+
 	for (let zonePath in thermalZones) {
 		let temp = readFileContent(zonePath + '/temp');
 		if (temp == null) continue;
-		
+
 		let tempValue = +temp;
 		if (tempValue != tempValue) continue; // NaN check
-		
+
 		let type = readFileContent(zonePath + '/type') || 'thermal';
-		
+
+		// Record the underlying device so an hwmon node pointing at the
+		// very same device can be recognised as a true duplicate.
+		let zoneDevId = realpath(zonePath + '/device');
+		if (zoneDevId != null)
+			thermalDeviceIds[zoneDevId] = true;
+
 		// Update peak temperature
 		let key = zonePath;
 		if (peakTemps[key] == null || tempValue > peakTemps[key]) {
 			peakTemps[key] = tempValue;
 		}
-		
+
 		push(sensors, {
 			name: type,
 			temp: tempValue,
@@ -67,11 +77,22 @@ function getSensors() {
 	
 	for (let hwmonPath in hwmonDirs) {
 		let deviceName = readFileContent(hwmonPath + '/name') || 'hwmon';
-		
+
+		// An hwmon node is only a duplicate of a thermal_zone when both
+		// resolve to the *same* physical device. Comparing temperature
+		// values instead (the previous approach) wrongly dropped distinct
+		// sensors whose readings happened to be close — e.g. an MT7915
+		// radio hovering within a couple of degrees of the SoC zone would
+		// flicker in and out as the temperatures drifted. Identity is
+		// stable, so the sensor list no longer flickers.
+		let hwmonDevId = realpath(hwmonPath + '/device');
+		let isDuplicate =
+			hwmonDevId != null && thermalDeviceIds[hwmonDevId] == true;
+
 		// Find all temp*_input files
 		let files = lsdir(hwmonPath);
 		if (!files) continue;
-		
+
 		for (let file in files) {
 			// Check if file matches temp*_input pattern
 			if (index(file, 'temp') != 0 || index(file, '_input') < 0)
@@ -92,20 +113,7 @@ function getSensors() {
 			let label = readFileContent(labelPath);
 			
 			let sensorName = label || deviceName;
-			
-			// Check for duplicates with thermal_zone
-			let isDuplicate = false;
-			for (let s in sensors) {
-				if (s.source == 'thermal_zone') {
-					let diff = s.temp - tempValue;
-					if (diff < 0) diff = -diff;
-					if (diff < 2000) {
-						isDuplicate = true;
-						break;
-					}
-				}
-			}
-			
+
 			if (!isDuplicate) {
 				// Update peak temperature
 				let key = tempPath;
